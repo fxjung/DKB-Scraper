@@ -227,20 +227,24 @@ class DKBSession(object):
             raise RuntimeError("Could not find selection forms.")
 
         for o in list(self.accounts.keys()):
-            if not 'PayPal' in self.accounts[o]:
+            rdata=None
+            if 'PayPal' in in self.accounts[o]:
+                continue
+            elif "Kreditkarte" in self.accounts[o]:
                 select_form.fields['slAllAccounts'] = o
-                select_form.fields['searchPeriodRadio'] = '1'
-                select_form.fields['transactionDate'] = start_date_str
-                select_form.fields['toTransactionDate'] = end_date_str
+                select_form.fields['filterType'] = 'DATE_RANGE'
+                select_form.fields['postingDate'] = start_date_str
+                select_form.fields['toPostingDate'] = end_date_str
 
-                r = self.s.post(self.base_url + select_form.action, data=dict(select_form.fields))
+                r = self.s.post(self.base_url + select_form.action,
+                    data=dict(select_form.fields))
 
 
                 soup = bs4.BeautifulSoup(r.text, features="lxml")
 
                 csv_url = soup.find('a',tid='csvExport')['href']
 
-                r = self.s.get(self.base_url+csv_url)
+                rdata = self.s.get(self.base_url+csv_url)
 
                 fout = open(
                         destination+"ac%s_%s_to_%s.csv"%(
@@ -250,6 +254,32 @@ class DKBSession(object):
                             ),
                         'w'
                         )
-                fout.write(r.text)
+                fout.write(rdata.text)
+                fout.close()
+            else:
+                select_form.fields['slAllAccounts'] = o
+                select_form.fields['searchPeriodRadio'] = '1'
+                select_form.fields['transactionDate'] = start_date_str
+                select_form.fields['toTransactionDate'] = end_date_str
+
+                r = self.s.post(self.base_url + select_form.action,
+                    data=dict(select_form.fields))
+
+
+                soup = bs4.BeautifulSoup(r.text, features="lxml")
+
+                csv_url = soup.find('a',tid='csvExport')['href']
+
+                rdata = self.s.get(self.base_url+csv_url)
+
+                fout = open(
+                        destination+"ac%s_%s_to_%s.csv"%(
+                            o,
+                            start_date_str,
+                            end_date_str
+                            ),
+                        'w'
+                        )
+                fout.write(rdata.text)
                 fout.close()
             time.sleep(5)
