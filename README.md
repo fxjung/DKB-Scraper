@@ -1,4 +1,9 @@
 DKB-Scraper
 ===========
 
-Scraper tools for DKB Online Banking (Postbox etc.)
+Werkzeuge um mit dem DKB Online Banking automatisiert zu interagieren.
+
+Aktuelle Features:
+
+- Herunterladen von Post aus dem Postfach
+- Herunterladen der Umsätze aller verknüpften Konten.
